@@ -3,7 +3,7 @@
 
 [![npm version](https://img.shields.io/npm/v/@jasset/kiwoom.svg)](https://www.npmjs.com/package/@jasset/kiwoom)
 
-Typescript client for KIS API(KoreaInvestment OpenAPI).
+Typescript client for Kiwoom Open API.
 
 ## Installation
 
@@ -14,27 +14,32 @@ npm install @jasset/kiwoom
 ## How to use
 
 ```typescript
-import { createKiwoomClient } from "@jasset/kiwoom";
+import { KiwoomClient } from "@jasset/kiwoom";
 
 async function main() {
-  const client = createKiwoomClient({
-    appKey: process.env.KIWOOM_APP_KEY,
-    appSecret: process.env.KIWOOM_APP_SECRET,
-  });
+  // 1. Initialize Client
+  const client = new KiwoomClient(
+    process.env.KIWOOM_APP_KEY!,
+    process.env.KIWOOM_APP_SECRET!,
+    true // isMock: true for mock investment, false for real
+  );
 
-  // 1. (Optional) Get Access Token manually
-  // The client will automatically fetch and reuse the token if not set.
-  // const { access_token } = await client.getAccessToken();
-  // client.setAccessToken(access_token);
+  // 2. Issue Access Token
+  // You should manage the token yourself (e.g. cache it)
+  const tokenResponse = await client.issueAccessToken();
+  const token = tokenResponse.token;
+  console.log('Access Token:', token);
 
-  // 2. Call API (e.g. Check Domestic Holiday)
-  // Token is automatically handled!
-  // New: APIs are organized under namespaces
-  const result = await client.domestic.checkHoliday({
-    bassDt: "20231225",
-  });
-  
-  console.log(result.holidays);
+  // 3. Call APIs
+
+  // Example: Get Daily Balance Yield (ka01690)
+  const dailyBalance = await client.getDailyBalanceYield(token, "20231225");
+  console.log('Daily Balance:', dailyBalance);
+
+  // Example: Get Real-time Stock Search Ranking (ka00198)
+  // qry_tp: '1'(1min), '2'(10min), '3'(1hour), '4'(cumulative), '5'(30sec)
+  const ranking = await client.getStockSearchRanking(token, '1');
+  console.log('Stock Ranking:', ranking.item_inq_rank);
 }
 main();
 ```
