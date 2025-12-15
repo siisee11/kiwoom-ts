@@ -33,7 +33,7 @@ export interface KiwoomOAuthTokenResponse {
  *
  * OAuth 인증을 위한 접근 토큰을 발급받습니다.
  *
- * @param {KiwoomOAuthTokenRequest} data - 요청 데이터
+ * @param {KiwoomOAuthTokenReques} data - 요청 데이터
  * @param {boolean} [isMock=false] - 모의투자 여부 (기본값: false, 실전투자)
  * @returns {Promise<KiwoomOAuthTokenResponse>} 접근토큰 발급 응답
  *
@@ -56,7 +56,7 @@ export interface KiwoomOAuthTokenResponse {
  */
 export async function issueAccessToken(
   data: KiwoomOAuthTokenRequest,
-  isMock: boolean = false,
+  isMock = false,
 ): Promise<KiwoomOAuthTokenResponse> {
   const host = isMock ? "https://mockapi.kiwoom.com" : "https://api.kiwoom.com";
   const endpoint = "/oauth2/token";

@@ -63,7 +63,7 @@ export interface KiwoomStockSearchRankingResponse {
 export async function fetchStockSearchRanking(
   token: string,
   data: KiwoomStockSearchRankingRequest,
-  isMock: boolean = false,
+  isMock = false,
 ): Promise<KiwoomStockSearchRankingResponse> {
   const host = isMock ? "https://mockapi.kiwoom.com" : "https://api.kiwoom.com";
   const endpoint = "/api/dostk/stkinfo";

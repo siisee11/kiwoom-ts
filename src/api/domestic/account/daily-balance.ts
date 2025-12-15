@@ -72,7 +72,7 @@ export interface KiwoomDailyBalanceYieldResponse {
 export async function fetchDailyBalanceYield(
   token: string,
   data: KiwoomDailyBalanceYieldRequest,
-  isMock: boolean = false,
+  isMock = false,
 ): Promise<KiwoomDailyBalanceYieldResponse> {
   const host = isMock ? "https://mockapi.kiwoom.com" : "https://api.kiwoom.com";
   const endpoint = "/api/dostk/acnt";
