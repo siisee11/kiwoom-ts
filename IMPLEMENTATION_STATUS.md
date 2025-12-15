@@ -4,10 +4,10 @@ This table tracks the implementation status of the KIWOOM API endpoints.
 
 | ID | Name | Category | URL | Status | Note |
 |:---|:---|:---|:---|:---|:---|
-| au10001 | 접근토큰 발급 | OAuth 인증 > 접근토큰발급 | /oauth2/token | ❌ Unimplemented |  |
+| au10001 | 접근토큰 발급 | OAuth 인증 > 접근토큰발급 | /oauth2/token | ✅ [Implemented](src/api/oauth2/token.ts) |  |
 | au10002 | 접근토큰폐기 | OAuth 인증 > 접근토큰폐기 | /oauth2/revoke | ❌ Unimplemented |  |
 | ka00198 | 실시간종목조회순위 | 국내주식 > 종목정보 | /api/dostk/stkinfo | ❌ Unimplemented |  |
-| ka01690 | 일별잔고수익률 | 국내주식 > 계좌 | /api/dostk/acnt | ❌ Unimplemented |  |
+| ka01690 | 일별잔고수익률 | 국내주식 > 계좌 | /api/dostk/acnt | ✅ [Implemented](src/api/domestic/account/daily-balance.ts) |  |
 | ka10001 | 주식기본정보요청 | 국내주식 > 종목정보 | /api/dostk/stkinfo | ❌ Unimplemented |  |
 | ka10002 | 주식거래원요청 | 국내주식 > 종목정보 | /api/dostk/stkinfo | ❌ Unimplemented |  |
 | ka10003 | 체결정보요청 | 국내주식 > 종목정보 | /api/dostk/stkinfo | ❌ Unimplemented |  |

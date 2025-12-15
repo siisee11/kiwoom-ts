@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import nock from 'nock';
-import { fetchDailyBalanceYield, KiwoomDailyBalanceYieldRequest, KiwoomDailyBalanceYieldResponse } from './daily-balance';
+import { fetchDailyBalanceYield, KiwoomDailyBalanceYieldRequest } from './daily-balance';
 
 describe('fetchDailyBalanceYield', () => {
     const dummyToken = 'test-token';
