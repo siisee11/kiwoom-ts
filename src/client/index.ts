@@ -1,5 +1,6 @@
 import { issueAccessToken, KiwoomOAuthTokenResponse } from '../api/oauth2/token';
 import { fetchDailyBalanceYield, KiwoomDailyBalanceYieldResponse } from '../api/domestic/account/daily-balance';
+import { fetchStockSearchRanking, KiwoomStockSearchRankingResponse, KiwoomStockSearchRankingRequest } from '../api/domestic/stock/ranking';
 
 export class KiwoomClient {
     private readonly appKey: string;
@@ -40,5 +41,15 @@ export class KiwoomClient {
      */
     async getDailyBalanceYield(token: string, date: string): Promise<KiwoomDailyBalanceYieldResponse> {
         return fetchDailyBalanceYield(token, { qry_dt: date }, this.isMock);
+    }
+
+    /**
+     * 실시간종목조회순위 (ka00198)
+     * 
+     * @param token 접근토큰
+     * @param qry_tp 구분 (1:1분, 2:10분, 3:1시간, 4:당일 누적, 5:30초)
+     */
+    async getStockSearchRanking(token: string, qry_tp: KiwoomStockSearchRankingRequest['qry_tp']): Promise<KiwoomStockSearchRankingResponse> {
+        return fetchStockSearchRanking(token, { qry_tp }, this.isMock);
     }
 }
