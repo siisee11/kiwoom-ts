@@ -1,16 +1,16 @@
 import {
-  issueAccessToken,
-  KiwoomOAuthTokenResponse,
-} from "../api/oauth2/token";
-import {
   fetchDailyBalanceYield,
-  KiwoomDailyBalanceYieldResponse,
+  type KiwoomDailyBalanceYieldResponse,
 } from "../api/domestic/account/daily-balance";
 import {
   fetchStockSearchRanking,
-  KiwoomStockSearchRankingResponse,
-  KiwoomStockSearchRankingRequest,
+  type KiwoomStockSearchRankingRequest,
+  type KiwoomStockSearchRankingResponse,
 } from "../api/domestic/stock/ranking";
+import {
+  issueAccessToken,
+  type KiwoomOAuthTokenResponse,
+} from "../api/oauth2/token";
 
 export class KiwoomClient {
   private readonly appKey: string;
@@ -23,7 +23,7 @@ export class KiwoomClient {
    * @param appSecret 시크릿키
    * @param isMock 모의투자 여부 (기본값: false, 실전투자)
    */
-  constructor(appKey: string, appSecret: string, isMock: boolean = false) {
+  constructor(appKey: string, appSecret: string, isMock = false) {
     this.appKey = appKey;
     this.appSecret = appSecret;
     this.isMock = isMock;
