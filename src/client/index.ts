@@ -1,32 +1,72 @@
+import { KiwoomDomesticAccountClient } from "../api/domestic/account";
 import {
   fetchDailyBalanceYield,
   type KiwoomDailyBalanceYieldResponse,
 } from "../api/domestic/account/daily-balance";
-import {
-  fetchStockSearchRanking,
-  type KiwoomStockSearchRankingRequest,
-  type KiwoomStockSearchRankingResponse,
+import { KiwoomDomesticStockClient } from "../api/domestic/stock";
+import type {
+  KiwoomStockSearchRankingRequest,
+  KiwoomStockSearchRankingResponse,
 } from "../api/domestic/stock/ranking";
-import {
-  issueAccessToken,
-  type KiwoomOAuthTokenResponse,
-} from "../api/oauth2/token";
+import { fetchStockSearchRanking } from "../api/domestic/stock/ranking";
+import type { KiwoomOAuthTokenResponse } from "../api/oauth2/token";
+import { KiwoomAuth } from "../auth";
+import { createKiwoomTokenCoordinator } from "../auth/token-coordinator";
+import { KiwoomHttpClient } from "../http";
+import type { KiwoomClientConfig, KiwoomTokenResponse } from "../types";
+
+const normalizeConfig = (
+  configOrAppKey: KiwoomClientConfig | string,
+  appSecret?: string,
+  isMock = false,
+): KiwoomClientConfig => {
+  if (typeof configOrAppKey === "string") {
+    return {
+      appKey: configOrAppKey,
+      appSecret: appSecret ?? "",
+      env: isMock ? "demo" : "real",
+    };
+  }
+
+  return configOrAppKey;
+};
 
 export class KiwoomClient {
-  private readonly appKey: string;
-  private readonly appSecret: string;
-  private readonly isMock: boolean;
+  readonly auth: KiwoomAuth;
+  readonly domesticAccount: KiwoomDomesticAccountClient;
+  readonly domesticStock: KiwoomDomesticStockClient;
+
+  private readonly config: KiwoomClientConfig;
+  private readonly tokenCoordinator: ReturnType<
+    typeof createKiwoomTokenCoordinator
+  >;
 
   /**
    * KiwoomClient 생성자
-   * @param appKey 앱키
-   * @param appSecret 시크릿키
-   * @param isMock 모의투자 여부 (기본값: false, 실전투자)
+   * @param config 앱키, 시크릿키, 환경, fetch 구현체 등의 설정
    */
-  constructor(appKey: string, appSecret: string, isMock = false) {
-    this.appKey = appKey;
-    this.appSecret = appSecret;
-    this.isMock = isMock;
+  constructor(config: KiwoomClientConfig);
+  /**
+   * @deprecated 객체 기반 생성자인 `new KiwoomClient({ appKey, appSecret })`를 권장합니다.
+   */
+  constructor(appKey: string, appSecret: string, isMock?: boolean);
+  constructor(
+    configOrAppKey: KiwoomClientConfig | string,
+    appSecret?: string,
+    isMock = false,
+  ) {
+    this.config = normalizeConfig(configOrAppKey, appSecret, isMock);
+    this.auth = new KiwoomAuth(this.config);
+    this.tokenCoordinator = createKiwoomTokenCoordinator(
+      this.auth,
+      this.config.accessToken,
+    );
+
+    const http = new KiwoomHttpClient(this.config, () =>
+      this.tokenCoordinator.ensure(),
+    );
+    this.domesticAccount = new KiwoomDomesticAccountClient(http);
+    this.domesticStock = new KiwoomDomesticStockClient(http);
   }
 
   /**
@@ -36,14 +76,47 @@ export class KiwoomClient {
    * 생성시 입력한 앱키와 시크릿키를 사용합니다.
    */
   async issueAccessToken(): Promise<KiwoomOAuthTokenResponse> {
-    return issueAccessToken(
-      {
-        grant_type: "client_credentials",
-        appkey: this.appKey,
-        secretkey: this.appSecret,
-      },
-      this.isMock,
-    );
+    const token = await this.auth.generateToken();
+    const raw =
+      token.raw && typeof token.raw === "object"
+        ? (token.raw as Record<string, string | number>)
+        : {};
+
+    return {
+      expires_dt:
+        typeof raw.expires_dt === "string"
+          ? raw.expires_dt
+          : (token.expiresDt ?? ""),
+      token_type:
+        typeof raw.token_type === "string"
+          ? raw.token_type
+          : (token.tokenType ?? "Bearer"),
+      token: token.token,
+      return_code:
+        typeof raw.return_code === "number" ? raw.return_code : undefined,
+      return_msg:
+        typeof raw.return_msg === "string" ? raw.return_msg : undefined,
+    };
+  }
+
+  generateToken(): Promise<KiwoomTokenResponse> {
+    return this.auth.generateToken();
+  }
+
+  ensureAccessToken(): Promise<string> {
+    return this.tokenCoordinator.ensure();
+  }
+
+  refreshAccessToken(): Promise<string> {
+    return this.tokenCoordinator.refresh();
+  }
+
+  setAccessToken(token: string, expiresDt?: string): void {
+    this.tokenCoordinator.set(token, expiresDt);
+  }
+
+  resetAccessToken(): void {
+    this.tokenCoordinator.reset();
   }
 
   /**
@@ -56,7 +129,11 @@ export class KiwoomClient {
     token: string,
     date: string,
   ): Promise<KiwoomDailyBalanceYieldResponse> {
-    return fetchDailyBalanceYield(token, { qry_dt: date }, this.isMock);
+    return fetchDailyBalanceYield(
+      token,
+      { qry_dt: date },
+      this.config.env === "demo",
+    );
   }
 
   /**
@@ -69,6 +146,13 @@ export class KiwoomClient {
     token: string,
     qry_tp: KiwoomStockSearchRankingRequest["qry_tp"],
   ): Promise<KiwoomStockSearchRankingResponse> {
-    return fetchStockSearchRanking(token, { qry_tp }, this.isMock);
+    return fetchStockSearchRanking(
+      token,
+      { qry_tp },
+      this.config.env === "demo",
+    );
   }
 }
+
+export const createKiwoomClient = (config: KiwoomClientConfig) =>
+  new KiwoomClient(config);

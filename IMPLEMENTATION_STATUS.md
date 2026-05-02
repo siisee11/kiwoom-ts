@@ -5,7 +5,7 @@ This table tracks the implementation status of the KIWOOM API endpoints.
 | ID | Name | Category | URL | Status | Note |
 |:---|:---|:---|:---|:---|:---|
 | au10001 | 접근토큰 발급 | OAuth 인증 > 접근토큰발급 | /oauth2/token | ✅ [Implemented](src/api/oauth2/token.ts) |  |
-| au10002 | 접근토큰폐기 | OAuth 인증 > 접근토큰폐기 | /oauth2/revoke | ❌ Unimplemented |  |
+| au10002 | 접근토큰폐기 | OAuth 인증 > 접근토큰폐기 | /oauth2/revoke | ✅ [Implemented](src/auth/index.ts) | `KiwoomAuth.revokeToken` |
 | ka00198 | 실시간종목조회순위 | 국내주식 > 종목정보 | /api/dostk/stkinfo | ✅ [Implemented](src/api/domestic/stock/ranking.ts) |  |
 | ka01690 | 일별잔고수익률 | 국내주식 > 계좌 | /api/dostk/acnt | ✅ [Implemented](src/api/domestic/account/daily-balance.ts) |  |
 | ka10001 | 주식기본정보요청 | 국내주식 > 종목정보 | /api/dostk/stkinfo | ❌ Unimplemented |  |
@@ -74,7 +74,7 @@ This table tracks the implementation status of the KIWOOM API endpoints.
 | ka10072 | 일자별종목별실현손익요청_일자 | 국내주식 > 계좌 | /api/dostk/acnt | ❌ Unimplemented |  |
 | ka10073 | 일자별종목별실현손익요청_기간 | 국내주식 > 계좌 | /api/dostk/acnt | ❌ Unimplemented |  |
 | ka10074 | 일자별실현손익요청 | 국내주식 > 계좌 | /api/dostk/acnt | ❌ Unimplemented |  |
-| ka10075 | 미체결요청 | 국내주식 > 계좌 | /api/dostk/acnt | ❌ Unimplemented |  |
+| ka10075 | 미체결요청 | 국내주식 > 계좌 | /api/dostk/acnt | ✅ [Implemented](src/api/domestic/account/index.ts) | `client.domesticAccount.getUnexecuted` |
 | ka10076 | 체결요청 | 국내주식 > 계좌 | /api/dostk/acnt | ❌ Unimplemented |  |
 | ka10077 | 당일실현손익상세요청 | 국내주식 > 계좌 | /api/dostk/acnt | ❌ Unimplemented |  |
 | ka10078 | 증권사별종목매매동향요청 | 국내주식 > 시세 | /api/dostk/mrkcond | ❌ Unimplemented |  |
@@ -155,7 +155,7 @@ This table tracks the implementation status of the KIWOOM API endpoints.
 | ka90010 | 프로그램매매추이요청 일자별 | 국내주식 > 시세 | /api/dostk/mrkcond | ❌ Unimplemented |  |
 | ka90012 | 대차거래내역요청 | 국내주식 > 대차거래 | /api/dostk/slb | ❌ Unimplemented |  |
 | ka90013 | 종목일별프로그램매매추이요청 | 국내주식 > 시세 | /api/dostk/mrkcond | ❌ Unimplemented |  |
-| kt00001 | 예수금상세현황요청 | 국내주식 > 계좌 | /api/dostk/acnt | ❌ Unimplemented |  |
+| kt00001 | 예수금상세현황요청 | 국내주식 > 계좌 | /api/dostk/acnt | ✅ [Implemented](src/api/domestic/account/index.ts) | `client.domesticAccount.getDepositBalanceDetails` |
 | kt00002 | 일별추정예탁자산현황요청 | 국내주식 > 계좌 | /api/dostk/acnt | ❌ Unimplemented |  |
 | kt00003 | 추정자산조회요청 | 국내주식 > 계좌 | /api/dostk/acnt | ❌ Unimplemented |  |
 | kt00004 | 계좌평가현황요청 | 국내주식 > 계좌 | /api/dostk/acnt | ❌ Unimplemented |  |
@@ -170,7 +170,7 @@ This table tracks the implementation status of the KIWOOM API endpoints.
 | kt00015 | 위탁종합거래내역요청 | 국내주식 > 계좌 | /api/dostk/acnt | ❌ Unimplemented |  |
 | kt00016 | 일별계좌수익률상세현황요청 | 국내주식 > 계좌 | /api/dostk/acnt | ❌ Unimplemented |  |
 | kt00017 | 계좌별당일현황요청 | 국내주식 > 계좌 | /api/dostk/acnt | ❌ Unimplemented |  |
-| kt00018 | 계좌평가잔고내역요청 | 국내주식 > 계좌 | /api/dostk/acnt | ❌ Unimplemented |  |
+| kt00018 | 계좌평가잔고내역요청 | 국내주식 > 계좌 | /api/dostk/acnt | ✅ [Implemented](src/api/domestic/account/index.ts) | `client.domesticAccount.getAccountEvaluationBalanceDetails` |
 | kt10000 | 주식 매수주문 | 국내주식 > 주문 | /api/dostk/ordr | ❌ Unimplemented |  |
 | kt10001 | 주식 매도주문 | 국내주식 > 주문 | /api/dostk/ordr | ❌ Unimplemented |  |
 | kt10002 | 주식 정정주문 | 국내주식 > 주문 | /api/dostk/ordr | ❌ Unimplemented |  |

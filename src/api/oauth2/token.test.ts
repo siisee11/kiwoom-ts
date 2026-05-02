@@ -1,6 +1,5 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
-import nock from "nock";
-import { issueAccessToken, KiwoomOAuthTokenRequest } from "./token";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { issueAccessToken, type KiwoomOAuthTokenRequest } from "./token";
 
 describe("issueAccessToken", () => {
   const dummyRequest: KiwoomOAuthTokenRequest = {
@@ -18,35 +17,55 @@ describe("issueAccessToken", () => {
   };
 
   afterEach(() => {
-    nock.cleanAll();
+    vi.restoreAllMocks();
   });
 
   it("should issue access token successfully (Real)", async () => {
-    nock("https://api.kiwoom.com")
-      .post("/oauth2/token", dummyRequest as any)
-      .reply(200, successResponse);
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(
+        new Response(JSON.stringify(successResponse), { status: 200 }),
+      );
 
     const result = await issueAccessToken(dummyRequest);
 
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://api.kiwoom.com/oauth2/token",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify(dummyRequest),
+      }),
+    );
     expect(result).toEqual(successResponse);
   });
 
   it("should issue access token successfully (Mock)", async () => {
-    nock("https://mockapi.kiwoom.com")
-      .post("/oauth2/token", dummyRequest as any)
-      .reply(200, successResponse);
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(
+        new Response(JSON.stringify(successResponse), { status: 200 }),
+      );
 
     const result = await issueAccessToken(dummyRequest, true);
 
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://mockapi.kiwoom.com/oauth2/token",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify(dummyRequest),
+      }),
+    );
     expect(result).toEqual(successResponse);
   });
 
   it("should throw error when API call fails", async () => {
     const errorResponse = { error: "invalid_grant" };
-    nock("https://api.kiwoom.com")
-      .post("/oauth2/token")
-      .reply(400, errorResponse);
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify(errorResponse), { status: 400 }),
+    );
 
-    await expect(issueAccessToken(dummyRequest)).rejects.toEqual(errorResponse);
+    await expect(issueAccessToken(dummyRequest)).rejects.toThrow(
+      "Invalid Kiwoom token request.",
+    );
   });
 });

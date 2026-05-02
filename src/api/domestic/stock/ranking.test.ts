@@ -1,8 +1,7 @@
-import { describe, it, expect, afterEach } from "vitest";
-import nock from "nock";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   fetchStockSearchRanking,
-  KiwoomStockSearchRankingRequest,
+  type KiwoomStockSearchRankingRequest,
 } from "./ranking";
 
 describe("fetchStockSearchRanking", () => {
@@ -52,18 +51,29 @@ describe("fetchStockSearchRanking", () => {
   };
 
   afterEach(() => {
-    nock.cleanAll();
+    vi.restoreAllMocks();
   });
 
   it("should fetch stock search ranking successfully (Real)", async () => {
-    nock("https://api.kiwoom.com")
-      .post("/api/dostk/stkinfo", dummyRequest as any)
-      .matchHeader("authorization", `Bearer ${dummyToken}`)
-      .matchHeader("api-id", "ka00198")
-      .reply(200, successResponse, headers);
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(
+        new Response(JSON.stringify(successResponse), { status: 200, headers }),
+      );
 
     const result = await fetchStockSearchRanking(dummyToken, dummyRequest);
 
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://api.kiwoom.com/api/dostk/stkinfo",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify(dummyRequest),
+        headers: expect.objectContaining({
+          authorization: `Bearer ${dummyToken}`,
+          "api-id": "ka00198",
+        }),
+      }),
+    );
     expect(result).toEqual({
       ...successResponse,
       cont_yn: "N",
@@ -72,11 +82,11 @@ describe("fetchStockSearchRanking", () => {
   });
 
   it("should fetch stock search ranking successfully (Mock)", async () => {
-    nock("https://mockapi.kiwoom.com")
-      .post("/api/dostk/stkinfo", dummyRequest as any)
-      .matchHeader("authorization", `Bearer ${dummyToken}`)
-      .matchHeader("api-id", "ka00198")
-      .reply(200, successResponse, headers);
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(
+        new Response(JSON.stringify(successResponse), { status: 200, headers }),
+      );
 
     const result = await fetchStockSearchRanking(
       dummyToken,
@@ -84,6 +94,10 @@ describe("fetchStockSearchRanking", () => {
       true,
     );
 
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://mockapi.kiwoom.com/api/dostk/stkinfo",
+      expect.any(Object),
+    );
     expect(result).toEqual({
       ...successResponse,
       cont_yn: "N",

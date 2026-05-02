@@ -1,6 +1,6 @@
 {
   "name": "@jasset/kiwoom",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/siisee11/kiwoom-ts"
@@ -15,8 +15,8 @@
     "build:playground": "vite build --config playground/vite.config.ts",
     "preview": "vite preview --config playground/vite.config.ts",
     "prepublishOnly": "npm run build",
-    "lint": "biome format --check",
-    "format": "biome format --fix",
+    "lint": "biome check .",
+    "format": "biome check --write .",
     "test": "vitest"
   },
   "files": [
@@ -29,14 +29,10 @@
       "require": "./dist/index.cjs"
     }
   },
-  "dependencies": {
-    "axios": "^1.13.2"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@biomejs/biome": "2.3.8",
     "@types/node": "^25.0.1",
-    "concurrently": "9.2.1",
-    "nock": "^14.0.10",
     "tsup": "^8.5.1",
     "typescript": "~5.9.3",
     "vitest": "^4.0.15"

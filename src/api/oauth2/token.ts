@@ -1,4 +1,6 @@
-import axios from "axios";
+import { KiwoomAuth } from "../../auth";
+import { getKiwoomBaseUrl } from "../../config/constants";
+import type { KiwoomEnv } from "../../types";
 
 /**
  * 접근토큰 발급 요청 인터페이스
@@ -27,6 +29,13 @@ export interface KiwoomOAuthTokenResponse {
   /** 응답 메시지 */
   return_msg?: string;
 }
+
+const getEnv = (isMock: boolean): KiwoomEnv => (isMock ? "demo" : "real");
+
+const getRawField = <T>(raw: unknown, field: string): T | undefined => {
+  if (!raw || typeof raw !== "object") return undefined;
+  return (raw as Record<string, T>)[field];
+};
 
 /**
  * 접근토큰 발급 (au10001)
@@ -58,25 +67,25 @@ export async function issueAccessToken(
   data: KiwoomOAuthTokenRequest,
   isMock = false,
 ): Promise<KiwoomOAuthTokenResponse> {
-  const host = isMock ? "https://mockapi.kiwoom.com" : "https://api.kiwoom.com";
-  const endpoint = "/oauth2/token";
-  const url = `${host}${endpoint}`;
+  const auth = new KiwoomAuth({
+    appKey: data.appkey,
+    appSecret: data.secretkey,
+    env: getEnv(isMock),
+  });
+  const token = await auth.generateToken();
 
-  const headers = {
-    "Content-Type": "application/json;charset=UTF-8",
+  return {
+    expires_dt:
+      getRawField<string>(token.raw, "expires_dt") ?? token.expiresDt ?? "",
+    token_type:
+      getRawField<string>(token.raw, "token_type") ??
+      token.tokenType ??
+      "Bearer",
+    token: token.token,
+    return_code: getRawField<number>(token.raw, "return_code"),
+    return_msg: getRawField<string>(token.raw, "return_msg"),
   };
-
-  try {
-    const response = await axios.post<KiwoomOAuthTokenResponse>(url, data, {
-      headers,
-    });
-
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      // API 에러 응답 처리 (필요 시 에러 타입 정의 가능)
-      throw error.response.data;
-    }
-    throw error;
-  }
 }
+
+export const getKiwoomOAuthBaseUrl = (isMock = false) =>
+  getKiwoomBaseUrl(getEnv(isMock));

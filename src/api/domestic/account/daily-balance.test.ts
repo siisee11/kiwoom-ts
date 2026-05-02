@@ -1,8 +1,7 @@
-import { describe, it, expect, afterEach } from "vitest";
-import nock from "nock";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   fetchDailyBalanceYield,
-  KiwoomDailyBalanceYieldRequest,
+  type KiwoomDailyBalanceYieldRequest,
 } from "./daily-balance";
 
 describe("fetchDailyBalanceYield", () => {
@@ -42,18 +41,29 @@ describe("fetchDailyBalanceYield", () => {
   };
 
   afterEach(() => {
-    nock.cleanAll();
+    vi.restoreAllMocks();
   });
 
   it("should fetch daily balance yield successfully (Real)", async () => {
-    nock("https://api.kiwoom.com")
-      .post("/api/dostk/acnt", dummyRequest as any)
-      .matchHeader("authorization", `Bearer ${dummyToken}`)
-      .matchHeader("api-id", "ka01690")
-      .reply(200, successResponse, headers);
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(
+        new Response(JSON.stringify(successResponse), { status: 200, headers }),
+      );
 
     const result = await fetchDailyBalanceYield(dummyToken, dummyRequest);
 
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://api.kiwoom.com/api/dostk/acnt",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify(dummyRequest),
+        headers: expect.objectContaining({
+          authorization: `Bearer ${dummyToken}`,
+          "api-id": "ka01690",
+        }),
+      }),
+    );
     expect(result).toEqual({
       ...successResponse,
       cont_yn: "N",
@@ -62,14 +72,18 @@ describe("fetchDailyBalanceYield", () => {
   });
 
   it("should fetch daily balance yield successfully (Mock)", async () => {
-    nock("https://mockapi.kiwoom.com")
-      .post("/api/dostk/acnt", dummyRequest as any)
-      .matchHeader("authorization", `Bearer ${dummyToken}`)
-      .matchHeader("api-id", "ka01690")
-      .reply(200, successResponse, headers);
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(
+        new Response(JSON.stringify(successResponse), { status: 200, headers }),
+      );
 
     const result = await fetchDailyBalanceYield(dummyToken, dummyRequest, true);
 
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://mockapi.kiwoom.com/api/dostk/acnt",
+      expect.any(Object),
+    );
     expect(result).toEqual({
       ...successResponse,
       cont_yn: "N",

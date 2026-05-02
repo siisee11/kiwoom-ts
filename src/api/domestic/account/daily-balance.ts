@@ -1,4 +1,6 @@
-import axios from "axios";
+import { getKiwoomBaseUrl } from "../../../config/constants";
+import { KiwoomApiError } from "../../../errors";
+import { getHeaderValue } from "../../../utils/case";
 
 /**
  * 일별잔고수익률 요청 인터페이스
@@ -74,36 +76,32 @@ export async function fetchDailyBalanceYield(
   data: KiwoomDailyBalanceYieldRequest,
   isMock = false,
 ): Promise<KiwoomDailyBalanceYieldResponse> {
-  const host = isMock ? "https://mockapi.kiwoom.com" : "https://api.kiwoom.com";
+  const host = getKiwoomBaseUrl(isMock ? "demo" : "real");
   const endpoint = "/api/dostk/acnt";
   const url = `${host}${endpoint}`;
 
-  const headers = {
-    "Content-Type": "application/json;charset=UTF-8",
-    authorization: `Bearer ${token}`,
-    "api-id": "ka01690",
-  };
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json;charset=UTF-8",
+      authorization: `Bearer ${token}`,
+      "api-id": "ka01690",
+    },
+    body: JSON.stringify(data),
+  });
 
-  try {
-    const response = await axios.post<KiwoomDailyBalanceYieldResponse>(
-      url,
-      data,
-      {
-        headers,
-      },
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new KiwoomApiError(
+      `Kiwoom request failed with status ${response.status}.`,
+      response.status,
+      body,
     );
-
-    const result = {
-      ...response.data,
-      cont_yn: response.headers["cont-yn"],
-      next_key: response.headers["next-key"],
-    };
-
-    return result;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      throw error.response.data;
-    }
-    throw error;
   }
+
+  return {
+    ...(body as KiwoomDailyBalanceYieldResponse),
+    cont_yn: getHeaderValue(response.headers, "cont-yn"),
+    next_key: getHeaderValue(response.headers, "next-key"),
+  };
 }
